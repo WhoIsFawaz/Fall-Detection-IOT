@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IOT Fall Detection</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        /* General Styling */
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #f4f7fc;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Navbar */
+        .navbar {
+            background-color: #003366; /* Navy Blue */
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 22px;
+            font-weight: bold;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Logout Button */
+        .logout-btn {
+            background-color: #ff4d4d; /* Red for Logout */
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            position: absolute;
+            right: 50px;
+            top: 10px;
+        }
+
+        .logout-btn:hover {
+            background-color: #e60000;
+        }
+
+        /* Footer */
+        .footer {
+            background-color: #003366;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+
+        /* Container */
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-start;
+            gap: 20px;
+            padding: 20px;
+            max-width: 90%;
+            margin: auto;
+        }
+
+        /* Card Styling */
+        .node-card {
+            width: 250px;
+            padding: 20px;
+            border-radius: 12px;
+            background: white;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            text-align: left;
+            position: relative;
+            transition: 0.3s;
+            border-left: 5px solid transparent;
+            color: #333; /* Default text color */
+        }
+
+        /* Card Labels */
+        .node-card h3 {
+            margin: 5px 0;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .node-card p {
+            margin: 5px 0;
+            font-size: 14px;
+            color: #555;
+        }
+
+        /* Background Colors for Status */
+        .node-safe {
+            border-left: 5px solid #28a745; /* Green */
+        }
+
+        .node-alert {
+            animation: flash 0.5s infinite alternate;
+            color: white !important; /* Ensure all text is visible */
+        }
+
+        @keyframes flash {
+            0% { background-color: red; color: white; }
+            50% { background-color: #ff6666; color: white; }
+            100% { background-color: red; color: white; }
+        }
+
+        /* Ensure Text & Icons are Visible on Flashing Red */
+        .node-alert h3, .node-alert p, .node-alert .hamburger {
+            color: white !important;
+        }
+
+        /* Hamburger Menu */
+        .hamburger {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            cursor: pointer;
+            font-size: 20px;
+        }
+
+        .menu-options {
+            display: none;
+            position: absolute;
+            top: 40px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.9); /* Dark Background */
+            color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+
+        .menu-options div {
+            padding: 10px;
+            cursor: pointer;
+            border-bottom: 1px solid #444;
+            transition: background 0.2s;
+        }
+
+        .menu-options div:hover {
+            background: #555;
+        }
+
+        /* History Box (Expands Inside the Card) */
+        .history-box {
+            display: none;
+            margin-top: 15px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.8); /* Darker for Visibility */
+            color: white;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: 0.3s;
+        }
+
+        .history-box ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .history-box ul li {
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .history-box ul li:last-child {
+            border-bottom: none;
+        }
+
+        /* Caregiver Box (Expands Inside the Card) */
+        .caregiver-box {
+            display: none;
+            margin-top: 15px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: 0.3s;
+        }
+
+    </style>
+</head>
+<body onclick="closeAllMenus(event)">
+
+    <div class="navbar">
+        IOT Fall Detection
+        <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+
+    <div id="nodes-container" class="container"></div>
+
+    <div class="footer">T20 Fall Detection</div>
+
+    <script>
+        async function fetchLatestNodes() {
+            let response = await fetch('/get_latest_status');
+            let nodes = await response.json();
+            
+            // Sort nodes by ID before displaying them
+            nodes.sort((a, b) => parseInt(a._id) - parseInt(b._id));
+
+            let container = document.getElementById('nodes-container');
+            container.innerHTML = ''; // Clear previous nodes
+
+            nodes.forEach(node => {
+                let latestStatus = node.latest_status;
+                let nodeCard = document.createElement('div');
+                nodeCard.classList.add('node-card');
+                
+                // Set color based on latest status
+                if (latestStatus === "NO FALL DETECTED") {
+                    nodeCard.classList.add('node-safe');
+                } else {
+                    nodeCard.classList.add('node-alert');
+                }
+
+                nodeCard.innerHTML = `
+                    <span class="hamburger" onclick="toggleMenu(event, '${node._id}')">&#9776;</span>
+                    <h3>ID: ${node._id}</h3>
+                    <p><strong>Status:</strong> ${latestStatus}</p>
+                    <p><strong>Last Update:</strong> ${node.timestamp}</p>
+                    <div class="menu-options" id="menu-${node._id}">
+                        <div onclick="fetchNodeHistory('${node._id}')">📜 View History</div>
+                        <div onclick="fetchCaregiverInfo('${node._id}')">👤 View Elderly Info</div>
+                    </div>
+                    <div class="history-box" id="history-${node._id}"></div>
+                    <div class="caregiver-box" id="caregiver-${node._id}"></div>
+                `;
+
+                container.appendChild(nodeCard);
+            });
+        }
+
+        function toggleMenu(event, nodeId) {
+            event.stopPropagation();
+            let menu = document.getElementById(`menu-${nodeId}`);
+
+            // Hide other menus first
+            document.querySelectorAll('.menu-options').forEach(menu => {
+                menu.style.display = "none";
+            });
+
+            // Toggle this menu
+            menu.style.display = menu.style.display === "block" ? "none" : "block";
+        }
+
+        function closeAllMenus(event) {
+            // If the clicked element is NOT a menu or hamburger, close all menus
+            if (!event.target.classList.contains("hamburger")) {
+                document.querySelectorAll('.menu-options').forEach(menu => {
+                    menu.style.display = "none";
+                });
+            }
+        }
+
+        async function fetchNodeHistory(nodeId) {
+            let response = await fetch(`/get_history/${nodeId}`);
+            let history = await response.json();
+            
+            let historyBox = document.getElementById(`history-${nodeId}`);
+            if (!historyBox) return;
+
+            // Sort history in descending order (latest first)
+            history.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+            // Hide all other history boxes
+            document.querySelectorAll('.history-box').forEach(box => {
+                if (box.id !== `history-${nodeId}`) {
+                    box.style.display = "none";
+                }
+            });
+
+            historyBox.innerHTML = `<strong>History:</strong><ul></ul>`;
+            let historyList = historyBox.querySelector("ul");
+
+            history.forEach(entry => {
+                let listItem = document.createElement('li');
+                listItem.innerHTML = `${entry.status} - ${entry.timestamp}`;
+                historyList.appendChild(listItem);
+            });
+
+            // Toggle the history box inside the card
+            historyBox.style.display = historyBox.style.display === "block" ? "none" : "block";
+        }
+
+        async function fetchCaregiverInfo(nodeId) {
+            let response = await fetch(`/get_user_particulars/${nodeId}`);
+            let caregiverInfo = await response.json();
+            
+            let caregiverBox = document.getElementById(`caregiver-${nodeId}`);
+            if (!caregiverBox) return;
+
+            caregiverBox.innerHTML = `<strong>Elderly Info:</strong><ul></ul>`;
+            let caregiverList = caregiverBox.querySelector("ul");
+
+            if (caregiverInfo.error) {
+                caregiverBox.innerHTML = `<strong>${caregiverInfo.error}</strong>`;
+                caregiverBox.style.display = "block";
+                return;
+            }
+
+            const { elderly_name, elderly_address, caregiver_name, caregiver_phone } = caregiverInfo;
+            // Always show elderly information
+            caregiverList.innerHTML += `<li><strong>Elderly Name:</strong> ${elderly_name}</li>`;
+            caregiverList.innerHTML += `<li><strong>Elderly Address:</strong> ${elderly_address}</li>`;
+
+            // Check if the logged-in user is an admin
+            let isAdmin = "{{ user_role }}" === "admin";  // Check if the logged-in user is an admin
+
+            // Show caregiver info only if the user is an admin
+            if (isAdmin) {
+                caregiverList.innerHTML += `<li><strong>Caregiver Name:</strong> ${caregiver_name}</li>`;
+                caregiverList.innerHTML += `<li><strong>Caregiver Phone:</strong> ${caregiver_phone}</li>`;
+            }
+
+            caregiverBox.style.display = caregiverBox.style.display === "block" ? "none" : "block";
+        }
+
+        async function logout() {
+            // Call the logout API to clear session
+            let response = await fetch('/logout');
+            window.location.href = '/login_page'; // Redirect to login page
+        }
+
+        // Fetch latest nodes every 5 seconds
+        setInterval(fetchLatestNodes, 5000);
+        fetchLatestNodes(); // Initial call
+    </script>
+
+</body>
+</html>
