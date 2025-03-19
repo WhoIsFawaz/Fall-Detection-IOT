@@ -19,31 +19,80 @@
             background-color: #003366; /* Navy Blue */
             color: white;
             padding: 15px;
-            text-align: center;
             font-size: 22px;
             font-weight: bold;
             box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
-            justify-content: space-between;
+            display: flex;
+            justify-content: center;
             align-items: center;
+            position: relative;
         }
 
+        /* Navbar Title - Centered */
+        .navbar-title {
+            flex-grow: 1; 
+            text-align: center;
+        }
+
+        /* User Info - Right Aligned */
+        .user-info {
+            color: white;
+            cursor: pointer;
+            font-size: 18px;
+            padding: 5px 10px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease-in-out;
+            position: absolute;
+            right: 20px;
+        }
+
+        .user-info:hover {
+            background-color: #5f6583;
+        }
+
+        /* Dropdown Menu */
+        .dropdown-menu {
+            font-size: 18px;
+
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            background-color: #003366;
+            color: red;
+            border-bottom-right-radius: 5px;
+            border-bottom-left-radius: 5px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+            width: 270px;
+            overflow: hidden;
+        }
+
+        /* Show dropdown when active */
+        .user-info.active + .dropdown-menu {
+            display: block;
+        }
+
+        /* Dropdown Item */
+        .dropdown-menu div {
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        /* Hover effect for dropdown */
+        .dropdown-menu div:hover {
+            background-color: #5f6583;
+        }
         /* Logout Button */
         .logout-btn {
             background-color: #ff4d4d; /* Red for Logout */
-            color: white;
             padding: 10px 20px;
             border: none;
-            border-radius: 5px;
             cursor: pointer;
             font-size: 16px;
-            transition: background-color 0.3s;
-            position: absolute;
-            right: 50px;
-            top: 10px;
-        }
-
-        .logout-btn:hover {
-            background-color: #e60000;
+            transition: background-color 0.3s ease;
+            width: 100%; /* Full width to align with dropdown */
         }
 
         /* Footer */
@@ -194,7 +243,12 @@
 
     <div class="navbar">
         IOT Fall Detection
-        <button class="logout-btn" onclick="logout()">Logout</button>
+        <div class="user-info" onclick="toggleUserMenu(event)">
+            🙋 Welcome, {{ session['user']['caregiver_name'] }}
+        </div>
+        <div class="dropdown-menu" id="user-menu">
+            <div onclick="logout()">Logout</div>
+        </div>
     </div>
 
     <div id="nodes-container" class="container"></div>
@@ -231,7 +285,7 @@
                     <p><strong>Last Update:</strong> ${node.timestamp}</p>
                     <div class="menu-options" id="menu-${node._id}">
                         <div onclick="fetchNodeHistory('${node._id}')">📜 View History</div>
-                        <div onclick="fetchCaregiverInfo('${node._id}')">👤 View Elderly Info</div>
+                        <div onclick="fetchCaregiverInfo('${node._id}')">🧓 View Elderly Info</div>
                     </div>
                     <div class="history-box" id="history-${node._id}"></div>
                     <div class="caregiver-box" id="caregiver-${node._id}"></div>
@@ -280,7 +334,7 @@
                 }
             });
 
-            historyBox.innerHTML = `<strong>History:</strong><ul></ul>`;
+            historyBox.innerHTML = `<strong>📜 History:</strong><ul></ul>`;
             let historyList = historyBox.querySelector("ul");
 
             history.forEach(entry => {
@@ -300,7 +354,7 @@
             let caregiverBox = document.getElementById(`caregiver-${nodeId}`);
             if (!caregiverBox) return;
 
-            caregiverBox.innerHTML = `<strong>Elderly Info:</strong><ul></ul>`;
+            caregiverBox.innerHTML = `<strong>🧓 Elderly Info:</strong><ul></ul>`;
             let caregiverList = caregiverBox.querySelector("ul");
 
             if (caregiverInfo.error) {
@@ -324,6 +378,12 @@
             }
 
             caregiverBox.style.display = caregiverBox.style.display === "block" ? "none" : "block";
+        }
+
+        function toggleUserMenu(event) {
+            event.stopPropagation();
+            let menu = document.getElementById('user-menu');
+            menu.style.display = menu.style.display === "block" ? "none" : "block";
         }
 
         async function logout() {
