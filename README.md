@@ -1,7 +1,7 @@
 # IoT Fall Detection System
 
 ## Overview
-This is an **IoT-based fall detection system** designed to monitor elderly individuals and alert caregivers in real-time. It combines **ESP-NOW** for local communication, **LoRa** for long-range communication, and a **Flask server** for data processing and storage. The system is built for scalability, capable of handling **up to 10 devices per block (tested prototype)** in environments like **HDB blocks** or **community care facilities**.
+This is an **IoT-based fall detection system** designed to monitor elderly individuals and alert caregivers in real-time. It combines **ESP-NOW** for local communication, **LoRa** for long-range communication, and a **Flask server** for data processing and storage. The system is built for scalability, capable of handling **up to 5 devices per block (tested prototype)** in environments like **HDB blocks** or **community care facilities**.
 
 ---
 
@@ -9,7 +9,7 @@ This is an **IoT-based fall detection system** designed to monitor elderly indiv
 - **Real-Time Fall Detection**: Simulated via button press for now, but can be extended to use **accelerometer** and **gyroscope** sensors for real fall detection.
 - **Hybrid Wireless Network**: Combines **ESP-NOW** and **LoRa** for reliable, long-range communication and scalability.
 - **Real-Time Alerts**: Sends immediate alerts to caregivers with no countdown timer.
-- **Scalability**: Supports up to **10 devices per block (tested prototype)**.
+- **Scalability**: Supports up to **5 devices per block (tested prototype)**.
 - **AES Encryption**: Ensures secure data transmission between devices and the server.
 - **Web Interface**: Caregivers and administrators can monitor real-time data and receive alerts via a web dashboard.
 - **Low Power Consumption**: Designed for energy-efficient operation with **ESP-NOW** and **LoRa**.
@@ -84,7 +84,7 @@ This is an **IoT-based fall detection system** designed to monitor elderly indiv
 
 2. **Performance Testing**:
    - Measure **response time** and **latency**.
-   - Test scalability for **up to 10 devices (tested prototype)** and up to 100 in real-world environments.
+   - Test scalability for **up to 5 devices (tested prototype)** and up to 50 in real-world environments.
    - Monitor **packet loss** and **data reliability**.
 
 ---
