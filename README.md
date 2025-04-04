@@ -111,9 +111,9 @@ This IoT-based fall detection system offers a scalable, reliable, and secure sol
 
 ## Contributors
 - Chris
-- Nelson
 - Fawaz
 - Hakam
+- Nelson
 - Vignesh
 
 ---
