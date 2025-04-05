@@ -3,6 +3,8 @@
 ## Overview
 This is an **IoT-based fall detection system** designed to monitor elderly individuals and alert caregivers in real-time. It combines **ESP-NOW** for local communication, **LoRa** for long-range communication, and a **Flask server** for data processing and storage. The system is built for scalability, capable of handling **up to 5 devices per block (tested prototype)** in environments like **HDB blocks** or **community care facilities**.
 
+View Demo: https://www.youtube.com/watch?v=CFRKtU6GXKE
+
 ---
 
 ## Features
